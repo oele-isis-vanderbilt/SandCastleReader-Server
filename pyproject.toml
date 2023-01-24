@@ -1,0 +1,61 @@
+[project]
+name = "sandcastlereader-server"
+version = "0.0.1"
+description = "SandCastleReader: Server-side"
+authors = [
+    {name = "Eduardo Davalos", email="eduardo.davalos.anaya@vanderbilt.edu"}
+]
+license = {file = "LICENSE.txt"}
+readme = "README.md"
+requires-python = ">3.6"
+
+keywords = ["reading", "eye-tracking", "content", "quizzing"]
+
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+
+dependencies = [
+    'flask',
+    'pandas'
+]
+
+[project.optional-dependencies]
+test = [
+    'pytest',
+    'pytest-repeat',
+    'pytest-lazy-fixture',
+]
+
+[project.urls]
+homepath = "https://github.com/oele-isis-vanderbilt/SandCastleReader-Server"
+documentation = "https://oele-isis-vanderbilt.github.io/SandCastleReader-Server/"
+repository = "https://github.com/oele-isis-vanderbilt/SandCastleReader-Server"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]  # ["*"] by default
+namespaces = true
+
+# Reference:
+# https://stackoverflow.com/questions/4673373/logging-within-pytest-tests
+[tool.pytest.ini_options]
+
+# Logging + CLI
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s.%(msecs)03d [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# Timeout
+faulthandler_timeout=120
+
+# Ignore warnings
+filterwarnings = "ignore::DeprecationWarning"
