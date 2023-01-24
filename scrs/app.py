@@ -84,3 +84,12 @@ def logs():
         )
 
     return jsonify({"success": True, "record": "saved"})
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+
+    session.pop("logged_in", None)
+    session.pop("username", None)
+
+    return jsonify({"success": True, "username": request.form["username"]})

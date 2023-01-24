@@ -26,6 +26,10 @@ def login(client, username, password):
     )
 
 
+def logout(client, username):
+    return client.post("/logout", data={"username": username}, follow_redirects=True)
+
+
 def send_entry(client, timestamp, topic, information):
     return client.post(
         "/logs",
@@ -56,3 +60,9 @@ def test_login_and_creating_record(client):
         send_entry(client, datetime.datetime.now(), "init", "Hello World").data
     )
     assert response["success"]
+
+
+def test_login_and_logout(client):
+    login(client, "test_user", "123456789")
+    response = json.loads(logout(client, "test_user").data)
+    assert response["success"] and response["username"] == "test_user"
