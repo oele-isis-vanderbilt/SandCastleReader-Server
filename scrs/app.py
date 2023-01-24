@@ -10,6 +10,7 @@ load_dotenv()
 
 # Third-party Imports
 from flask import Flask, session, request, jsonify
+from flask_cors import CORS
 import pandas as pd
 
 # Internal Imports
@@ -19,7 +20,7 @@ from .updated_json_provider import UpdatedJSONProvider
 logger = logging.getLogger()
 
 # Determine the application's location
-ROOT_DIR = pathlib.Path(__file__).resolve().parent.parent
+ROOT_DIR = pathlib.Path(os.path.abspath(__file__)).parent.parent
 LOGS_DIR = ROOT_DIR / "logs"
 
 # Create app instance
@@ -27,9 +28,12 @@ app = Flask(__name__)
 app.json = UpdatedJSONProvider(app)
 app.secret_key = os.environ.get("SECRET_KEY")
 
+# Enable CORS
+CORS(app, resources={r"/*": {"origins": "*"}})
+
 # Loading super simple CSV user database
 csv_writing_lock = threading.Lock()
-user_database = pd.read_csv(str(ROOT_DIR / "assets" / "login_database.csv"))
+user_database = pd.read_csv(str(ROOT_DIR / "scrs" / "assets" / "login_database.csv"))
 
 # Add routes
 @app.route("/", methods=["GET"])

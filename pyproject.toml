@@ -17,6 +17,7 @@ classifiers = [
 
 dependencies = [
     'flask',
+    'flask-cors',
     'pandas',
     'python-dotenv',
     'waitress'
