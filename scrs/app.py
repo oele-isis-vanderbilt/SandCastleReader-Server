@@ -74,12 +74,13 @@ def logs():
     timestamp = request.form["timestamp"]
     topic = request.form["topic"]
     info = request.form["information"]
+    username = request.form["username"]
     data = {"timestamp": timestamp, "topic": topic, "info": info}
 
     df: pd.DataFrame = pd.Series(data).to_frame().T
 
     # Compute the path
-    user_csv_path = LOGS_DIR / f"{session['username']}-records.csv"
+    user_csv_path = LOGS_DIR / f"{username}-records.csv"
 
     # Get the content and write it to the logs
     with csv_writing_lock:
