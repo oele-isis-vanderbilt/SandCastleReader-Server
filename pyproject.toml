@@ -17,14 +17,15 @@ classifiers = [
 
 dependencies = [
     'flask',
-    'pandas'
+    'pandas',
+    'python-dotenv',
+    'waitress'
 ]
 
 [project.optional-dependencies]
 test = [
     'pytest',
-    'pytest-repeat',
-    'pytest-lazy-fixture',
+    'pre-commit'
 ]
 
 [project.urls]

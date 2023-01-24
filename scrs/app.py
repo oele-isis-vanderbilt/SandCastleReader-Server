@@ -1,45 +1,86 @@
 # Built-in
+import os
 import pathlib
 import logging
+import threading
+import copy
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Third-party Imports
 from flask import Flask, session, request, jsonify
 import pandas as pd
+
+# Internal Imports
+from .updated_json_provider import UpdatedJSONProvider
 
 # Setup Logger
 logger = logging.getLogger()
 
 # Determine the application's location
 ROOT_DIR = pathlib.Path(__file__).resolve().parent.parent
+LOGS_DIR = ROOT_DIR / "logs"
 
 # Create app instance
 app = Flask(__name__)
+app.json = UpdatedJSONProvider(app)
+app.secret_key = os.environ.get("SECRET_KEY")
 
 # Loading super simple CSV user database
-user_database = pd.read_csv(str(ROOT_DIR/'assets'/'login_database.csv'))
+csv_writing_lock = threading.Lock()
+user_database = pd.read_csv(str(ROOT_DIR / "assets" / "login_database.csv"))
 
 # Add routes
-@app.route("/ping", methods=['GET'])
-def ping():
-    return jsonify({'respond': 'pong'})
+@app.route("/", methods=["GET"])
+def home():
+    return "SandCastleReader Server Alive"
 
-@app.route("/login", methods=['POST'])
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"response": "pong"})
+
+
+@app.route("/login", methods=["POST"])
 def login():
 
     # Sanitized username and password
-    username = str(request.form['username'])
-    password = str(request.form['password'])
+    username = str(request.form["username"])
+    password = str(request.form["password"])
 
     # Search in the database
-    matching_usernames = user_database[user_database['username'] == username]
+    matching_usernames = user_database[user_database["username"] == username]
     if len(matching_usernames) == 0:
-        return jsonify({'success': False, 'msg': 'Incorrect username'})
+        return jsonify({"success": False, "msg": "Incorrect username"})
     else:
         series = matching_usernames.iloc[0]
-        if str(series['password']) == password:
-            return jsonify({'success': True})
-    
-    return jsonify({'success': False, 'msg': 'Incorrect password'})
+        if str(series["password"]) == password:
+            session["logged_in"] = True
+            session["username"] = copy.copy(username)
+            return jsonify({"success": True})
 
-if __name__ == "__main__":
-    app.run()
+    return jsonify({"success": False, "msg": "Incorrect password"})
+
+
+@app.route("/logs", methods=["POST"])
+def logs():
+
+    # Extract the information (timestamp, topic, information)
+    timestamp = request.form["timestamp"]
+    topic = request.form["topic"]
+    info = request.form["information"]
+    data = {"timestamp": timestamp, "topic": topic, "info": info}
+
+    df: pd.DataFrame = pd.Series(data).to_frame().T
+
+    # Compute the path
+    user_csv_path = LOGS_DIR / f"{session['username']}-records.csv"
+
+    # Get the content and write it to the logs
+    with csv_writing_lock:
+        df.to_csv(
+            str(user_csv_path), mode="a", header=not user_csv_path.exists(), index=False
+        )
+
+    return jsonify({"success": True, "record": "saved"})
