@@ -34,6 +34,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Loading super simple CSV user database
 csv_writing_lock = threading.Lock()
 user_database = pd.read_csv(str(ROOT_DIR / "scrs" / "assets" / "login_database.csv"))
+glossary_database = pd.read_csv(str(ROOT_DIR / "scrs" / "assets" / "glossary_database.csv"))
 
 # Add routes
 @app.route("/", methods=["GET"])
@@ -89,6 +90,32 @@ def logs():
         )
 
     return jsonify({"success": True, "record": "saved"})
+
+
+@app.route('/glossary', methods=["GET", "POST"])
+def glossary_list():
+
+    if request.method == 'GET':
+        
+        # glossary = []
+        # for i, row in glossary_database.iterrows():
+        #     glossary.append(f"p{row['pdf_id']}w{row['word_id']}")
+        glossary = glossary_database['pdf_word_id'].values.tolist()
+
+        return jsonify({"success": True, "glossary": glossary})
+
+    elif request.method == 'POST':
+        
+        # Get the inputs
+        pdf_word_id = str(request.form['pdf_word_id'])
+        matching_ids = glossary_database[glossary_database['pdf_word_id'] == pdf_word_id]
+        if len(matching_ids) == 0:
+            return jsonify({"success": False, "word": '', "definition": ''})
+        else:
+            series = matching_ids.iloc[0]
+            return jsonify({"success": True, "word": series['word'], "definition": series['definition']})
+
+    return jsonify({'success': False})
 
 
 @app.route("/logout", methods=["POST"])
