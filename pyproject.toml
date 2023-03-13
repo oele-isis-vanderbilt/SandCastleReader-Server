@@ -20,7 +20,8 @@ dependencies = [
     'flask-cors',
     'pandas',
     'python-dotenv',
-    'waitress'
+    'waitress',
+    'netifaces'
 ]
 
 [project.optional-dependencies]
